@@ -277,6 +277,8 @@ if (userType === "staff") {
 const tabs = document.querySelectorAll(".nav button");
 const profileSection = document.querySelector(".profile");
 const projectsSection = document.querySelector(".columns .card");
+const settingsSection = document.querySelector(".settings");
+const adminSection = document.querySelector(".admin");
 
 tabs.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -288,12 +290,20 @@ tabs.forEach((btn) => {
         btn.dataset.view === "feed" ? "block" : "none";
       projectsSection.style.display =
         btn.dataset.view === "feed" ? "block" : "none";
+      settingsSection.style.display =
+        btn.dataset.view === "feed" ? "none" : "block";
+      adminSection.style.display =
+        btn.dataset.view === "feed" ? "none" : "block";
     }
     // profile section
     if (btn.dataset.view === "my-profile") {
       profileSection.style.display =
         btn.dataset.view === "my-profile" ? "block" : "none";
       projectsSection.style.display =
+        btn.dataset.view === "my-profile" ? "none" : "block";
+      settingsSection.style.display =
+        btn.dataset.view === "my-profile" ? "none" : "block";
+      adminSection.style.display =
         btn.dataset.view === "my-profile" ? "none" : "block";
     }
     // discover section
@@ -302,14 +312,21 @@ tabs.forEach((btn) => {
         btn.dataset.view === "discover" ? "none" : "block";
       projectsSection.style.display =
         btn.dataset.view === "discover" ? "block" : "none";
-      
+      settingsSection.style.display =
+        btn.dataset.view === "discover" ? "none" : "block";
+      adminSection.style.display =
+        btn.dataset.view === "discover" ? "none" : "block";
     }
     // settings section
     if (btn.dataset.view === "settings") {
       profileSection.style.display =
-        btn.dataset.view === "settings" ? "block" : "none";
+        btn.dataset.view === "settings" ? "none" : "block";
       projectsSection.style.display =
+        btn.dataset.view === "settings" ? "none" : "block";
+      settingsSection.style.display =
         btn.dataset.view === "settings" ? "block" : "none";
+      adminSection.style.display =
+        btn.dataset.view === "settings" ? "none" : "block";
     }
     // staff panel section
     if (btn.dataset.view === "staff-panel") {
@@ -317,6 +334,10 @@ tabs.forEach((btn) => {
         btn.dataset.view === "staff-panel" ? "block" : "none";
       projectsSection.style.display =
         btn.dataset.view === "staff-panel" ? "block" : "none";
+      settingsSection.style.display =
+        btn.dataset.view === "staff-panel" ? "none" : "block";
+      adminSection.style.display =
+        btn.dataset.view === "staff-panel" ? "none" : "block";
     }
     // company panel section
     if (btn.dataset.view === "company-panel") {
@@ -324,16 +345,134 @@ tabs.forEach((btn) => {
         btn.dataset.view === "company-panel" ? "block" : "none";
       projectsSection.style.display =
         btn.dataset.view === "company-panel" ? "block" : "none";
+      settingsSection.style.display =
+        btn.dataset.view === "company-panel" ? "none" : "block";
+      adminSection.style.display =
+        btn.dataset.view === "company-panel" ? "none" : "block";
     }
     // admin panel
-    if (btn.dataset.view === "admin-panel") {
+    if (btn.dataset.view === "admin-Panel") {
       profileSection.style.display =
         btn.dataset.view === "admin-panel" ? "block" : "none";
       projectsSection.style.display =
         btn.dataset.view === "admin-panel" ? "block" : "none";
+      settingsSection.style.display =
+        btn.dataset.view === "admin-panel" ? "block" : "none";
+      adminSection.style.display =
+        btn.dataset.view === "admin-panel" ? "none" : "block";
     }
   });
 });
+
+// ----------------------------
+// Admin Dashboard functionality
+// ----------------------------
+
+// Only render admin panel if user is admin
+if (userType === "admin") {
+  const adminSection = document.getElementById("adminScreen");
+
+  // Stats
+  function renderAdminStats() {
+    document.getElementById("totalUsers").textContent = users.length;
+    document.getElementById("totalPosts").textContent = projects.length;
+    document.getElementById("flaggedPosts").textContent = projects.filter(
+      (p) => p.flagged
+    ).length;
+  }
+
+  // Render users list
+  function renderAdminUsers() {
+    const list = document.getElementById("userList");
+    if (!list) return;
+    list.innerHTML = "";
+    users.forEach((u, i) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <span>${u.username} (${u.title})</span>
+        <div>
+          <button class="btn small" onclick="editAdminUser(${i})">Edit</button>
+          <button class="btn small" onclick="deleteAdminUser(${i})">Delete</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function editAdminUser(index) {
+    const user = users[index];
+    const modal = document.getElementById("editUserModal");
+    document.getElementById("editUsername").value = user.username;
+    document.getElementById("editEmail").value = user.email || "";
+    document.getElementById("editRole").value = user.userType || "user";
+    modal.showModal();
+    document.getElementById("saveUserBtn").onclick = () => {
+      user.username = document.getElementById("editUsername").value;
+      user.email = document.getElementById("editEmail").value;
+      user.userType = document.getElementById("editRole").value;
+      modal.close();
+      renderAdminUsers();
+      logActivity(`Admin edited user "${user.username}"`);
+    };
+  }
+
+  function deleteAdminUser(index) {
+    if (confirm("Are you sure you want to delete this user?")) {
+      const removed = users.splice(index, 1);
+      renderAdminUsers();
+      renderAdminStats();
+      logActivity(`Admin deleted user "${removed[0].username}"`);
+    }
+  }
+
+  // Render posts list
+  function renderAdminPosts() {
+    const list = document.getElementById("postList");
+    if (!list) return;
+    list.innerHTML = "";
+    projects.forEach((p, i) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      if (p.flagged) div.style.border = "1px solid red";
+      div.innerHTML = `
+        <span>${p.title} by ${p.owner}</span>
+        <div>
+          <button class="btn small" onclick="toggleFlagPost(${i})">${
+        p.flagged ? "Unflag" : "Flag"
+      }</button>
+          <button class="btn small" onclick="deletePost(${i})">Delete</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function toggleFlagPost(index) {
+    projects[index].flagged = !projects[index].flagged;
+    renderAdminPosts();
+    renderAdminStats();
+    logActivity(
+      `Admin ${projects[index].flagged ? "flagged" : "unflagged"} project "${
+        projects[index].title
+      }"`
+    );
+  }
+
+  function deletePost(index) {
+    if (confirm("Are you sure you want to delete this project?")) {
+      const removed = projects.splice(index, 1);
+      renderAdminPosts();
+      renderAdminStats();
+      logActivity(`Admin deleted project "${removed[0].title}"`);
+    }
+  }
+
+  // Initial render for admin
+  renderAdminStats();
+  renderAdminUsers();
+  renderAdminPosts();
+}
 
 // ----------------------------
 // Sign out
