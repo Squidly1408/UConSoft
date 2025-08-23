@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UON Showcase — Social Portfolio Demo</title>
+  <meta name="description" content="Demo social portfolio for UON students, staff and companies. Built for Firebase drop‑in.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* 
+     * UON Showcase — single‑file demo
+     * Palette from UON Brand Identity (Primary):
+     *   --uon-blue: #35B0E6;
+     *   --uon-black: #000000;  greys: #323232, #7F7F7F, #BFBFBF, #E5E5E5; white #FFFFFF
+     * Light/Dark via data-theme attribute on <html>.
+     */
+    :root {
+      --uon-blue: #35B0E6;
+      --uon-black: #000000;
+      --g-90: #1a1a1a; /* custom surface for dark */
+      --g-80: #323232; /* brand 80% */
+      --g-50: #7F7F7F; /* brand 50% */
+      --g-20: #BFBFBF; /* brand 20% */
+      --g-10: #E5E5E5; /* brand 10% */
+      --white: #FFFFFF;
+
+      --bg: #f7f8f9;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #555;
+      --border: #e6e6e6;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 16px;
+    }
+    html[data-theme="dark"] {
+      --bg: #0d0f10;
+      --card: #15181a;
+      --text: #e6e6e6;
+      --muted: #a9b0b6;
+      --border: #23272a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg); color: var(--text);
+    }
+    .app {
+      display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 20px; background: linear-gradient(180deg, var(--uon-black), #0b0f12 60%);
+      color: white; border-right: 1px solid #0f1418; display: flex; flex-direction: column; }
+    .brand { display:flex; align-items:center; gap:12px; margin-bottom: 18px; }
+    .brand-badge { width: 40px; height: 40px; border-radius: 10px; background: var(--uon-black); display:grid; place-items:center; outline: 2px solid #2b2f33; }
+    .brand-badge svg { width:24px; height:24px; fill: white; }
+    .brand h1 { font-size: 18px; line-height: 1.1; margin:0; font-weight: 800; letter-spacing: .2px; }
+    .brand small { opacity: .7; font-weight: 600; }
+
+    .sidebar .search { margin: 10px 0 16px; position: relative; }
+    .sidebar input[type="search"] {
+      width: 100%; padding: 12px 40px 12px 12px; border-radius: 12px; border: 1px solid #2b2f33; background: #0f1418; color: white; outline: none;
+    }
+    .sidebar .search .icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); opacity: .7; }
+
+    .nav { display: grid; gap: 6px; margin-top: 6px; }
+    .nav button { text-align: left; border: 1px solid #252a2e; background: #0f1418; color: #d7dde3; padding: 10px 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .nav button.active, .nav button:hover { border-color: var(--uon-blue); box-shadow: 0 0 0 3px rgba(53,176,230,.2) inset; }
+
+    .role-switcher { margin-top: 16px; border-top: 1px dashed #222; padding-top: 12px; }
+    .role-tags { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip { padding: 6px 10px; border-radius: 999px; border:1px solid #2b2f33; background:#0f1418; color:#d7dde3; font-weight:600; cursor:pointer; }
+    .chip.active { background: var(--uon-blue); color: #001018; border-color: transparent; }
+
+    .sidebar .footer { margin-top: auto; font-size: 12px; opacity:.8; display:grid; gap:8px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius: 10px; border:1px solid var(--border); background: var(--card); color: var(--text); cursor:pointer; font-weight:600; }
+    .btn.primary { background: var(--uon-blue); color: #001018; border: none; }
+    .btn.ghost { background: transparent; color: #cbd5dc; border:1px solid #263039; }
+
+    /* Main */
+    main { padding: 28px; }
+    header.topbar { display:flex; align-items:center; gap: 12px; justify-content: space-between; margin-bottom: 22px; }
+    .toolbar { display:flex; gap: 10px; align-items:center; }
+    .toggle { position: relative; width: 54px; height: 28px; background: var(--g-10); border-radius: 999px; border:1px solid var(--border); cursor: pointer; }
+    .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; background: white; border-radius: 999px; box-shadow: var(--shadow); transition: transform .2s ease; }
+    html[data-theme="dark"] .toggle { background: #1f252a; }
+    html[data-theme="dark"] .toggle::after { transform: translateX(26px); background: #0d0f10; border: 1px solid #2a2f34; }
+
+    .columns { display: grid; grid-template-columns: 1.45fr .9fr; gap: 18px; align-items: start; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .card .head { padding: 16px 16px; border-bottom: 1px solid var(--border); display:flex; align-items:center; justify-content: space-between; }
+    .card .content { padding: 16px; }
+    .muted { color: var(--muted); }
+
+    /* Project cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .project { position: relative; overflow: hidden; }
+    .project .cover { height: 140px; background: linear-gradient(120deg, rgba(53,176,230,.18), transparent), linear-gradient(#222, #111); border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); display:grid; place-items:center; }
+    .project .cover span { color: white; font-weight: 800; letter-spacing: .4px; }
+    .project .body { padding: 14px; display:grid; gap: 10px; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius: 999px; background: rgba(53,176,230,.12); border:1px solid rgba(53,176,230,.35); color: #0a2b38; font-weight:600; font-size: 12px; }
+    html[data-theme="dark"] .pill { color: #cfeeff; border-color: rgba(53,176,230,.35); }
+    .project .meta { display:flex; align-items:center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+    .actions { display:flex; gap: 8px; }
+
+    /* Right column */
+    .profile { display: grid; gap: 12px; }
+    .profile .row { display:flex; gap: 10px; align-items:center; }
+    .avatar { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--uon-blue), #7cd5ff); display:grid; place-items:center; font-weight:800; color:#001018; }
+    .statbar { display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .stat .num { font-weight: 800; font-size: 22px; }
+
+    .list { display:grid; gap: 8px; }
+    .list .item { display:flex; justify-content: space-between; align-items:center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); }
+
+    /* Modals */
+    dialog { border: none; border-radius: 16px; padding: 0; max-width: 720px; width: min(720px, 92vw); box-shadow: var(--shadow); background: var(--card); color: var(--text); }
+    dialog::backdrop { background: rgba(0,0,0,.45); backdrop-filter: blur(2px); }
+    .modal-head { padding: 16px; border-bottom: 1px solid var(--border); display:flex; justify-content: space-between; align-items:center; }
+    .modal-body { padding: 16px; display:grid; gap: 12px; }
+    .field { display:grid; gap: 6px; }
+    .input, textarea, select { padding: 10px 12px; border-radius: 10px; border:1px solid var(--border); background: var(--card); color: var(--text); }
+    textarea { min-height: 100px; resize: vertical; }
+
+    /* Badges */
+    .badge { display:inline-flex; gap:6px; align-items:center; padding: 6px 10px; border-radius:999px; border:1px solid var(--border); background: var(--card); font-weight:600; }
+    .badge.success { border-color: rgba(48,187,117,.35); background: rgba(48,187,117,.08); }
+    .badge.warn { border-color: rgba(255,179,71,.35); background: rgba(255,179,71,.12); }
+
+    /* Responsive */
+    @media (max-width: 980px){ .app { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; border-right: none; border-bottom:1px solid var(--border);} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">
+          <!-- Seahorse placeholder (do not use real logo in demo) -->
+          <svg viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="UON">
+            <path d="M14.8 2c-2.9 0-5.6 1.8-6.6 4.6-.7 2.1-.2 4.1 1 5.7-1.1.5-1.9 1.6-1.9 2.9 0 1.7 1.3 3 3 3h.7c.6 0 1 .4 1 1v.8c0 1.2 1 2 2.2 2h.4c.9 0 1.6-.7 1.6-1.6 0-.7-.5-1.3-1.2-1.5 1-1.7 1.7-3.3 2.2-4.7.5-1.5.8-2.8.8-3.9 0-4-2.3-8.3-3.2-8.3Zm-3.8 11.2c.5-.1 1-.5 1.2-1l.7-1.6c.3-.8.8-1.4 1.5-1.9.4.8.6 1.7.6 2.6 0 1-.3 2.2-.7 3.4-.4.9-.8 1.8-1.3 2.6-.2-.2-.5-.4-.8-.5-1.1-.6-1.9-1.7-2.2-3.1Z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>UON Showcase</h1>
+          <small>Demo · The world needs new</small>
+        </div>
+      </div>
+
+      <div class="search">
+        <input id="search" type="search" placeholder="Search people, projects, tags…" />
+        <span class="icon" aria-hidden="true">🔎</span>
+      </div>
+
+      <div class="nav" role="navigation" aria-label="Primary">
+        <button class="active" data-view="feed">Home / Feed</button>
+        <button data-view="discover">Discover</button>
+        <button data-view="my-profile">My Profile</button>
+        <button data-view="my-activity">My Activity</button>
+        <button data-view="admin">Admin (demo)</button>
+      </div>
+
+      <div class="role-switcher">
+        <div style="font-weight:800; letter-spacing:.2px;">Role</div>
+        <div class="role-tags" id="roleTags"></div>
+      </div>
+
+      <div class="footer">
+        <button class="btn ghost" id="signinBtn">Sign in (demo)</button>
+        <div style="opacity:.7">Brand colours and typography follow UON guidelines. This demo does not use the official logo.</div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="toolbar">
+          <button class="btn primary" id="newProjectBtn">+ New Project</button>
+          <button class="btn" id="editProfileBtn">Edit Profile</button>
+        </div>
+        <div class="toolbar">
+          <span class="badge" title="View switching">Viewing as <strong id="roleBadge">Student</strong></span>
+          <div id="themeToggle" class="toggle" role="switch" aria-label="Toggle dark mode" aria-checked="false"></div>
+        </div>
+      </header>
+
+      <section class="columns">
+        <div class="card">
+          <div class="head"><strong>Projects</strong><span class="muted" id="count"></span></div>
+          <div class="content">
+            <div id="projects" class="grid"></div>
+          </div>
+        </div>
+
+        <div class="profile">
+          <div class="card">
+            <div class="content">
+              <div class="row">
+                <div class="avatar" id="avatar">LN</div>
+                <div>
+                  <div style="font-weight:800; font-size:18px;">Lucas Newman</div>
+                  <div class="muted" id="profileTitle">Software Engineering (Hons)</div>
+                </div>
+              </div>
+              <div class="statbar">
+                <div class="stat"><div class="num" id="statProjects">0</div><div class="muted">Projects</div></div>
+                <div class="stat"><div class="num" id="statViews">0</div><div class="muted">Views</div></div>
+                <div class="stat"><div class="num" id="statSignoffs">0</div><div class="muted">Sign‑offs</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="head"><strong>Recent activity</strong><span class="muted">You & collaborators</span></div>
+            <div class="content list" id="activity"></div>
+          </div>
+
+          <div class="card">
+            <div class="head"><strong>People you may know</strong><span class="muted">(demo)</span></div>
+            <div class="content list" id="people"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Project Modal -->
+  <dialog id="projectModal">
+    <div class="modal-head">
+      <strong id="pmTitle">New Project</strong>
+      <button class="btn" onclick="projectModal.close()">Close</button>
+    </div>
+    <form id="projectForm" class="modal-body">
+      <div class="field">
+        <label>Title</label>
+        <input class="input" name="title" required placeholder="e.g., Smart Parking Detection (WIL)">
+      </div>
+      <div class="field">
+        <label>Type</label>
+        <select name="ptype" class="input" required>
+          <option>WIL Project</option>
+          <option>Assignment</option>
+          <option>Personal</option>
+          <option>Research Assistant</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Short description</label>
+        <textarea name="desc" placeholder="What problem, what impact, technologies used"></textarea>
+      </div>
+      <div class="field">
+        <label>Tags (comma separated)</label>
+        <input class="input" name="tags" placeholder="yolov7, raspberry pi, mqtt">
+      </div>
+      <div class="field">
+        <label>Request sign‑off from</label>
+        <select name="signoff" class="input">
+          <option value="">— optional —</option>
+          <option>UON Staff</option>
+          <option>Company</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; padding-top: 6px;">
+        <button type="button" class="btn" onclick="projectModal.close()">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Profile Modal -->
+  <dialog id="profileModal">
+    <div class="modal-head">
+      <strong>Edit Profile</strong>
+      <button class="btn" onclick="profileModal.close()">Close</button>
+    </div>
+    <form id="profileForm" class="modal-body">
+      <div class="field"><label>Display name</label><input class="input" name="name" value="Lucas Newman"></div>
+      <div class="field"><label>Headline</label><input class="input" name="title" value="Software Engineering (Hons)"></div>
+      <div class="field"><label>About</label><textarea name="about" placeholder="Short bio…">Building smart IoT + CV systems. Passionate about WIL.</textarea></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; padding-top: 6px;">
+        <button type="button" class="btn" onclick="profileModal.close()">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // --- Demo data (replace with Firebase later) ---
+    // Data model sketches for Firestore
+    // collections: users, projects, interactions, signoffs
+    // users/{uid}: {name, title, role, about, avatar, following: [uid], viewed: [projectId], createdAt}
+    // projects/{id}: {ownerId, title, type, desc, tags:[str], likes:[uid], views:int, signoffs:[{byRole, byName, at}]}
+    // interactions/{id}: {actorId, targetType: 'project'|'profile', targetId, verb:'liked|viewed|shared|followed|signed-off', at}
+
+    const roles = ["Student", "Staff", "Company", "Public"];
+    const me = { id: 'u_lucas', name: 'Lucas Newman', title: 'Software Engineering (Hons)', role: 'Student', about: 'Building smart IoT + CV systems. Passionate about WIL.' };
+
+    const people = [
+      { id: 'u_sam', name: 'Sam Willoughby', role: 'Staff', title: 'WIL Coordinator', initials: 'SW'},
+      { id: 'u_lee', name: 'Lee Broad', role: 'Student', title: 'Computer Science', initials: 'LB'},
+      { id: 'u_ari', name: 'Ari Chen', role: 'Company', title: 'Partner — SAPHI Engineering', initials: 'AC'},
+    ];
+
+    const projects = [
+      { id:'p1', ownerId: 'u_lucas', title:'Smart Car Counter (YOLOv7)', type:'Assignment', desc:'Counts vehicles with custom YOLOv7 model; tracks and tallies per class; uploads annotated stream to device‑hosted site.', tags:['yolov7','opencv','raspberry pi','mqtt'], likes:['u_lee'], views: 27, signoffs:[{byRole:'Staff', byName:'Dr Adrian Tan', at: Date.now()-86400000*2}] },
+      { id:'p2', ownerId: 'u_lucas', title:'WIL: Industry Safety Monitor', type:'WIL Project', desc:'Pico LiPo muscle movement sensing + motor control; uploads metrics; dashboard built in Flask.', tags:['pico','embedded','flask'], likes:[], views: 12, signoffs:[] },
+      { id:'p3', ownerId: 'u_lee', title:'Flutter USB Macro Keyboard', type:'Personal', desc:'Android app sends programmable keystrokes to Windows via USB HID.', tags:['flutter','usb','android'], likes:['u_lucas'], views: 58, signoffs:[{byRole:'Company', byName:'SAPHI Engineering', at: Date.now()-86400000*6}] },
+    ];
+
+    const interactions = [
+      { id:'a1', actorId:'u_sam', targetType:'project', targetId:'p1', verb:'viewed', at: Date.now()-3600*1000*3 },
+      { id:'a2', actorId:'u_ari', targetType:'project', targetId:'p1', verb:'signed-off', at: Date.now()-3600*1000*26 },
+      { id:'a3', actorId:'u_lee', targetType:'project', targetId:'p2', verb:'liked', at: Date.now()-3600*1000*32 },
+    ];
+
+    // --- UI helpers ---
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+    const fmt = (n) => new Intl.NumberFormat().format(n);
+    const ago = (ms) => { const d = Math.floor((Date.now()-ms)/1000); if (d<60) return `${d}s`; if (d<3600) return `${Math.floor(d/60)}m`; if (d<86400) return `${Math.floor(d/3600)}h`; return `${Math.floor(d/86400)}d`; };
+
+    // --- Theme ---
+    const themeToggle = $('#themeToggle');
+    themeToggle.addEventListener('click', () => {
+      const dark = document.documentElement.getAttribute('data-theme') !== 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', dark);
+      themeToggle.setAttribute('aria-checked', dark==='dark');
+      localStorage.setItem('theme', dark);
+    });
+    (function initTheme(){ const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'); document.documentElement.setAttribute('data-theme', t); themeToggle.setAttribute('aria-checked', t==='dark'); })();
+
+    // --- Roles ---
+    const roleTags = $('#roleTags');
+    roles.forEach(r => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (r===me.role ? ' active' : '');
+      b.textContent = r; b.onclick = () => setRole(r);
+      roleTags.appendChild(b);
+    });
+    function setRole(r){
+      me.role = r; $('#roleBadge').textContent = r; $$('.chip', roleTags).forEach(ch => ch.classList.toggle('active', ch.textContent===r));
+      // In real app: filter visibility, show sign‑off controls for Staff/Company
+      render();
+    }
+
+    // --- Search ---
+    const search = $('#search');
+    search.addEventListener('input', render);
+
+    // --- Projects list ---
+    function render(){
+      const q = search.value.trim().toLowerCase();
+      const list = projects.filter(p => !q || [p.title, p.type, p.desc, ...p.tags].join(' ').toLowerCase().includes(q));
+      $('#count').textContent = `${fmt(list.length)} shown`;
+      const wrap = $('#projects'); wrap.innerHTML = '';
+      list.forEach(p => {
+        const el = document.createElement('div'); el.className = 'card project';
+        el.innerHTML = `
+          <div class="cover"><span>${escapeHtml(p.title)}</span></div>
+          <div class="body">
+            <div class="pill" title="Type">${p.type}</div>
+            <div class="muted">${escapeHtml(p.desc)}</div>
+            <div>${p.tags.map(t => `<span class="pill" style="margin-right:6px">#${escapeHtml(t)}</span>`).join('')}</div>
+            <div class="meta">
+              <div>${p.views === 0 ? '—' : `${fmt(p.views)} view${p.views===1?'':'s'}`} · ${p.likes.length} likes</div>
+              <div class="actions">
+                <button class="btn" onclick="like('${p.id}')">❤ Like</button>
+                <button class="btn" onclick="share('${p.id}')">⇪ Share</button>
+                <button class="btn primary" onclick="openProject('${p.id}')">Open</button>
+              </div>
+            </div>
+            ${p.signoffs.length ? `<div class="badge success" title="Verified">
+              ✅ ${p.signoffs[p.signoffs.length-1].byRole} sign‑off by ${escapeHtml(p.signoffs[p.signoffs.length-1].byName)}
+            </div>` : `<div class="badge warn">⚑ Awaiting sign‑off</div>`}
+          </div>`;
+        wrap.appendChild(el);
+      });
+
+      // stats rhs
+      $('#statProjects').textContent = projects.filter(p => p.ownerId===me.id).length;
+      $('#statViews').textContent = projects.reduce((a,b)=>a+b.views,0);
+      $('#statSignoffs').textContent = projects.reduce((a,p)=>a+(p.signoffs?.length||0),0);
+
+      // activity
+      const act = $('#activity'); act.innerHTML='';
+      interactions.slice().sort((a,b)=>b.at-a.at).forEach(ev=>{
+        const who = people.find(x=>x.id===ev.actorId) || me;
+        const line = document.createElement('div');
+        line.className = 'item';
+        line.innerHTML = `<span><strong>${escapeHtml(who.name)}</strong> ${ev.verb} ${ev.targetType} <em>${ev.targetId}</em></span><span class="muted">${ago(ev.at)} ago</span>`;
+        act.appendChild(line);
+      });
+
+      // people suggestions
+      const ppl = $('#people'); ppl.innerHTML='';
+      people.forEach(p=>{
+        const it = document.createElement('div'); it.className = 'item';
+        it.innerHTML = `<span><strong>${escapeHtml(p.name)}</strong> · ${p.role}</span><button class="btn" onclick="follow('${p.id}')">Follow</button>`;
+        ppl.appendChild(it);
+      });
+    }
+
+    function like(id){
+      const p = projects.find(x=>x.id===id); if(!p.likes.includes(me.id)) p.likes.push(me.id);
+      interactions.push({id: 'a'+(interactions.length+1), actorId: me.id, targetType:'project', targetId: id, verb:'liked', at: Date.now()});
+      render();
+    }
+    function share(id){
+      navigator.clipboard?.writeText(location.href + '#'+id);
+      interactions.push({id: 'a'+(interactions.length+1), actorId: me.id, targetType:'project', targetId: id, verb:'shared', at: Date.now()});
+      alert('Share link copied for '+id+' (demo)');
+      render();
+    }
+    function follow(uid){
+      interactions.push({id: 'a'+(interactions.length+1), actorId: me.id, targetType:'profile', targetId: uid, verb:'followed', at: Date.now()});
+      render();
+    }
+
+    // Project modal (create/open)
+    const projectModal = $('#projectModal');
+    const projectForm = $('#projectForm');
+    $('#newProjectBtn').onclick = () => { $('#pmTitle').textContent = 'New Project'; projectForm.reset(); projectModal.showModal(); };
+    function openProject(id){
+      const p = projects.find(x=>x.id===id);
+      $('#pmTitle').textContent = 'Edit Project';
+      projectForm.title.value = p.title; projectForm.ptype.value = p.type; projectForm.desc.value = p.desc; projectForm.tags.value = p.tags.join(', '); projectForm.signoff.value = '';
+      projectForm.dataset.editing = id;
+      projectModal.showModal();
+      // View count + privacy‑friendly viewer hint
+      p.views += 1; renderToast(`${randomPerson()} viewed “${p.title}”`);
+      render();
+    }
+
+    projectForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const f = new FormData(projectForm);
+      const base = { title: f.get('title'), type: f.get('ptype'), desc: f.get('desc')||'', tags: (f.get('tags')||'').split(',').map(s=>s.trim()).filter(Boolean), likes:[], views:0, signoffs: [] };
+      if(projectForm.dataset.editing){
+        const p = projects.find(x=>x.id===projectForm.dataset.editing);
+        Object.assign(p, base);
+      } else {
+        projects.unshift({ id: 'p'+(Math.random().toString(36).slice(2,7)), ownerId: me.id, ...base });
+      }
+      if(f.get('signoff')){
+        // Create a pending sign‑off request (demo only)
+        interactions.push({ id:'a'+(interactions.length+1), actorId: me.id, targetType:'project', targetId: 'pending', verb:'requested-signoff', at: Date.now() });
+      }
+      projectModal.close();
+      render();
+    });
+
+    // Profile modal
+    const profileModal = $('#profileModal');
+    const profileForm = $('#profileForm');
+    $('#editProfileBtn').onclick = () => profileModal.showModal();
+    profileForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const f = new FormData(profileForm);
+      me.name = f.get('name'); me.title = f.get('title'); me.about = f.get('about');
+      $('#profileTitle').textContent = me.title; $('#avatar').textContent = initials(me.name);
+      profileModal.close();
+    });
+
+    // Sign in/out (stub for Firebase Auth)
+    $('#signinBtn').onclick = () => {
+      /*
+        // Firebase drop‑in (pseudo code)
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+        import { getFirestore, collection, getDocs } from 'firebase/firestore';
+        const app = initializeApp({ apiKey: '', authDomain: '', projectId: '' });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      */
+      alert('Hook up Firebase Auth here (Google, Microsoft, etc).');
+    };
+
+    // Utilities
+    function escapeHtml(str){ return (str+"").replace(/[&<>"']/g, (m)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m])); }
+    function initials(name){ return name.split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase(); }
+    function randomPerson(){ const n = ['1 person','2 people','3 people'][Math.floor(Math.random()*3)]; return n; }
+    function renderToast(text){
+      const t = document.createElement('div'); t.textContent = text; t.style.cssText = 'position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);font-weight:600;';
+      document.body.appendChild(t); setTimeout(()=>t.remove(), 2400);
+    }
+
+    // Initial render
+    render();
+
+    // --- Notes for Firebase wiring ---
+    // 1) Replace demo arrays with Firestore collections & onSnapshot listeners.
+    // 2) Use Firestore security rules keyed by role (student/staff/company/public) for privacy.
+    // 3) Save anonymised view counts in a subcollection (e.g., projects/{id}/metrics/views) and aggregate to a field.
+    // 4) Save sign‑offs as structured objects; only Staff/Company can create with custom claims in Auth.
+    // 5) Expose Algolia (or Firestore composite indexes) for full‑text search across name/title/tags.
+  </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UConSoft – University of Newcastle Student Portfolios</title>
+    <style>
+        :root {
+            --uon-blue: #35B0E6;
+            --uon-black: #000000;
+            --g-90: #1a1a1a;
+            --g-80: #323232;
+            --g-50: #7F7F7F;
+            --g-20: #BFBFBF;
+            --g-10: #E5E5E5;
+            --white: #FFFFFF;
+            --bg: #f7f8f9;
+            --card: #ffffff;
+            --text: #222;
+            --muted: #555;
+            --border: #e6e6e6;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .08);
+            --radius: 16px;
+        }
+
+        html[data-theme="dark"] {
+            --bg: #0d0f10;
+            --card: #15181a;
+            --text: #e6e6e6;
+            --muted: #a9b0b6;
+            --border: #23272a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        header {
+            background: var(--uon-black);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .branding {
+            display: flex;
+            align-items: center;
+
+        }
+
+        header h1 {
+            color: var(--white);
+            margin: 0;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--g-20);
+            color: var(--white);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            height: 80px;
+            width: 80px;
+        }
+
+        .hero {
+            position: relative;
+            height: 85vh;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-content {
+            position: relative;
+            color: var(--white);
+            z-index: 1;
+            max-width: 700px;
+            padding: 1rem;
+            background-color: var(--g-90);
+            border-radius: var(--radius);
+        }
+
+        .hero-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--g-10);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.9rem 2.2rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--uon-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #1f94c8;
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--uon-black);
+        }
+
+        .btn-secondary:hover {
+            background: var(--g-10);
+            transform: translateY(-3px);
+        }
+
+        footer {
+            background: var(--uon-black);
+            color: var(--g-20);
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="branding">
+            <img src="./assets/images/logo.svg" alt="Uconsoft logo" class="logo">
+            <h1>UConSoft</h1>
+        </div>
+        
+    </header>
+
+    <section class="hero" style="background-image: url('./assets/images/banner_techHub.jpg');">
+        <div class="hero-content">
+            <h2>Showcase Your UON Portfolio!</h2>
+            <p>A platform for University of Newcastle students to share their projects with the world.</p>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="location.href='./public.html'">Public View</button>
+                <button class="btn btn-secondary" onclick="location.href='./auth/login.html'">Log In</button>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        © 2025 University of Newcastle – UConSoft<br>
+        Acknowledging Traditional Custodians: Awabakal, Darkinjung, Biripai, Worimi, Wonnarua & Eora Nations.
+    </footer>
+
+    
+</body>
+
+</html>

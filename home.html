@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>uConSoft — UON's Social Portfolio</title>
+    <meta name="description"
+        content="Demo social portfolio for UON students, staff and companies. Built for Firebase drop‑in.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+
+
+            <div class="branding">
+                <img src="./assets/images/logo.svg" alt="Uconsoft logo" class="logo">
+                <h1>UConSoft</h1>
+
+            </div>
+
+            <div class="search">
+                <input id="search" type="search" placeholder="Search people, projects, tags…" />
+                <span class="icon" aria-hidden="true">🔎</span>
+            </div>
+
+            <div class="nav" role="navigation" aria-label="Primary">
+                <button class="active" data-view="feed">Home / Feed</button>
+                <button data-view="discover">Discover</button>
+                <button data-view="my-profile">My Profile</button>
+                <button data-view="settings">Settings</button>
+                <button data-view="staff-panel" style="display: none;" id="staffBtn">Staff Panel</button>
+                <button data-view="company-panel" style="display: none;" id="companyBtn">Company Panel</button>
+                <button data-view="admin-Panel" style="display: none;" id="adminBtn">Admin Panel</button>
+            </div>
+
+
+
+            <div class="footer">
+                <button class="btn ghost" id="signinBtn" onclick="signOut()">Sign Out</button>
+                <div style="opacity:.7">Brand colours and typography follow UON guidelines. This demo does not use the
+                    official logo.</div>
+            </div>
+        </aside>
+
+        <main>
+            <header class="topbar">
+                <div class="toolbar">
+                    <button class="btn primary" id="newProjectBtn" onclick="">+ New Project</button>
+                    <button class="btn" id="editProfileBtn">Edit Profile</button>
+                </div>
+                <div class="toolbar">
+
+
+                    <div id="themeToggle" class="toggle" role="switch" aria-label="Toggle dark mode"
+                        aria-checked="false"> </div>
+                </div>
+            </header>
+
+            <section class="columns">
+                <div class="card">
+                    <div class="head"><strong>Projects</strong><span class="muted" id="count"></span></div>
+                    <div class="content">
+                        <div id="projects" class="grid"></div>
+                    </div>
+                </div>
+
+                <div class="profile">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="avatar" id="avatar">LN</div>
+                                <div>
+                                    <div style="font-weight:800; font-size:18px;">Lucas Newman</div>
+                                    <span id="userRole"></span>
+                                    <div class="muted" id="profileTitle">Software Engineering (Hons)</div>
+                                </div>
+
+                            </div>
+                            <div class="statbar">
+                                <div class="stat">
+                                    <div class="num" id="statProjects">0</div>
+                                    <div class="muted">Projects</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="num" id="statViews">0</div>
+                                    <div class="muted">Views</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="num" id="statSignoffs">0</div>
+                                    <div class="muted">Sign‑offs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="head"><strong>Recent activity</strong><span class="muted">You & collaborators</span>
+                        </div>
+                        <div class="content list" id="activity"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="head"><strong>People you may know</strong><span class="muted">(demo)</span></div>
+                        <div class="content list" id="people"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <dialog id="projectModal">
+        <div class="modal-head">
+            <strong id="pmTitle">New Project</strong>
+            <button class="btn" onclick="projectModal.close()">Close</button>
+        </div>
+        <form id="projectForm" class="modal-body">
+            <div class="field">
+                <label>Title</label>
+                <input class="input" name="title" required placeholder="e.g., Smart Parking Detection (WIL)">
+            </div>
+            <div class="field">
+                <label>Type</label>
+                <select name="ptype" class="input" required>
+                    <option>WIL Project</option>
+                    <option>Assignment</option>
+                    <option>Personal</option>
+                    <option>Research Assistant</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Short description</label>
+                <textarea name="desc" placeholder="What problem, what impact, technologies used"></textarea>
+            </div>
+            <div class="field">
+                <label>Tags (comma separated)</label>
+                <input class="input" name="tags" placeholder="yolov7, raspberry pi, mqtt">
+            </div>
+            <div class="field">
+                <label>Request sign‑off from</label>
+                <select name="signoff" class="input">
+                    <option value="">— optional —</option>
+                    <option>UON Staff</option>
+                    <option>Company</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; padding-top: 6px;">
+                <button type="button" class="btn" onclick="projectModal.close()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Profile Modal -->
+    <dialog id="profileModal">
+        <div class="modal-head">
+            <strong>Edit Profile</strong>
+            <button class="btn" onclick="profileModal.close()">Close</button>
+        </div>
+        <form id="profileForm" class="modal-body">
+            <div class="field"><label>Display name</label><input class="input" name="name" value="Lucas Newman"></div>
+            <div class="field"><label>Headline</label><input class="input" name="title"
+                    value="Software Engineering (Hons)"></div>
+            <div class="field"><label>About</label><textarea name="about"
+                    placeholder="Short bio…">Building smart IoT + CV systems. Passionate about WIL.</textarea></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; padding-top: 6px;">
+                <button type="button" class="btn" onclick="profileModal.close()">Cancel</button>
+                <button type="submit" class="btn primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+    <script src="./script.js"></script>
+    <script src="./Auth/auth.js"></script>
+</body>
+
+</html>
