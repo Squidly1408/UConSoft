@@ -6,11 +6,23 @@ const currentUser = localStorage.getItem("username") || "Lucas"; // default demo
 const userType = localStorage.getItem("userType") || "student";
 
 if (!loggedIn || !userType) {
-  window.location.href = "./auth/login.html";
+  notLoggedIn();
+} else {
+  document.getElementsByClassName("btn signIn")[0].style.display = "none";
 }
 
 document.getElementById("userRole").textContent =
   userType.charAt(0).toUpperCase() + userType.slice(1);
+
+// ----------------------------
+// Non-logged in view
+// ----------------------------
+function notLoggedIn() {
+    document.getElementsByClassName("nav")[0].style.display = "none";
+    document.getElementsByClassName("btn ghost")[0].style.display = "none";
+}
+
+
 
 // ----------------------------
 // Theme toggle
@@ -34,57 +46,9 @@ themeToggle.addEventListener("click", () => {
 // ----------------------------
 // Demo database (ready for real DB later)
 // ----------------------------
-let users = [
-  {
-    username: "Lucas",
-    name: "Lucas Newman",
-    title: "Software Engineering (Hons)",
-  },
-  { username: "Alice", name: "Alice Smith", title: "Computer Science (Hons)" },
-  { username: "Bob", name: "Bob Johnson", title: "Staff" },
-];
 
-let projects = [
-  {
-    id: "p1",
-    owner: "Lucas",
-    title: "Smart Car Counter (YOLOv7)",
-    type: "Assignment",
-    desc: "Counts vehicles with YOLOv7; tracks and tallies per class.",
-    tags: ["yolov7", "opencv", "raspberry pi", "mqtt"],
-    views: 27,
-    likes: [],
-    signOffRequested: "Staff",
-    signedOffBy: [],
-    activity: [],
-  },
-  {
-    id: "p2",
-    owner: "Alice",
-    title: "Industry Safety Monitor",
-    type: "WIL Project",
-    desc: "Pico LiPo muscle sensing + motor control; uploads metrics.",
-    tags: ["pico", "embedded", "flask"],
-    views: 12,
-    likes: [],
-    signOffRequested: "Company",
-    signedOffBy: [],
-    activity: [],
-  },
-  {
-    id: "p3",
-    owner: "Lucas",
-    title: "Flutter USB Macro Keyboard",
-    type: "Personal",
-    desc: "Android app sends keystrokes to Windows via USB HID.",
-    tags: ["flutter", "usb", "android"],
-    views: 58,
-    likes: [],
-    signOffRequested: "",
-    signedOffBy: [],
-    activity: [],
-  },
-];
+
+
 
 let activityFeed = []; // global activity array
 
@@ -279,6 +243,7 @@ const profileSection = document.querySelector(".profile");
 const projectsSection = document.querySelector(".columns .card");
 const settingsSection = document.querySelector(".settings");
 const adminSection = document.querySelector(".admin");
+const staffSection = document.querySelector(".staff");
 
 tabs.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -294,6 +259,8 @@ tabs.forEach((btn) => {
         btn.dataset.view === "feed" ? "none" : "block";
       adminSection.style.display =
         btn.dataset.view === "feed" ? "none" : "block";
+      staffSection.style.display =
+        btn.dataset.view === "feed" ? "none" : "block";
     }
     // profile section
     if (btn.dataset.view === "my-profile") {
@@ -304,6 +271,8 @@ tabs.forEach((btn) => {
       settingsSection.style.display =
         btn.dataset.view === "my-profile" ? "none" : "block";
       adminSection.style.display =
+        btn.dataset.view === "my-profile" ? "none" : "block";
+      staffSection.style.display =
         btn.dataset.view === "my-profile" ? "none" : "block";
     }
     // discover section
@@ -316,6 +285,8 @@ tabs.forEach((btn) => {
         btn.dataset.view === "discover" ? "none" : "block";
       adminSection.style.display =
         btn.dataset.view === "discover" ? "none" : "block";
+      staffSection.style.display =
+        btn.dataset.view === "discover" ? "none" : "block";
     }
     // settings section
     if (btn.dataset.view === "settings") {
@@ -327,17 +298,21 @@ tabs.forEach((btn) => {
         btn.dataset.view === "settings" ? "block" : "none";
       adminSection.style.display =
         btn.dataset.view === "settings" ? "none" : "block";
+      staffSection.style.display =
+        btn.dataset.view === "settings" ? "none" : "block";
     }
     // staff panel section
     if (btn.dataset.view === "staff-panel") {
       profileSection.style.display =
-        btn.dataset.view === "staff-panel" ? "block" : "none";
+        btn.dataset.view === "staff-panel" ? "none" : "block";
       projectsSection.style.display =
-        btn.dataset.view === "staff-panel" ? "block" : "none";
+        btn.dataset.view === "staff-panel" ? "none" : "block";
       settingsSection.style.display =
         btn.dataset.view === "staff-panel" ? "none" : "block";
       adminSection.style.display =
         btn.dataset.view === "staff-panel" ? "none" : "block";
+      staffSection.style.display =
+        btn.dataset.view === "staff-panel" ? "block" : "none";
     }
     // company panel section
     if (btn.dataset.view === "company-panel") {
@@ -348,6 +323,8 @@ tabs.forEach((btn) => {
       settingsSection.style.display =
         btn.dataset.view === "company-panel" ? "none" : "block";
       adminSection.style.display =
+        btn.dataset.view === "company-panel" ? "none" : "block";
+      staffSection.style.display =
         btn.dataset.view === "company-panel" ? "none" : "block";
     }
     // admin panel
@@ -360,9 +337,131 @@ tabs.forEach((btn) => {
         btn.dataset.view === "admin-panel" ? "block" : "none";
       adminSection.style.display =
         btn.dataset.view === "admin-panel" ? "none" : "block";
+      staffSection.style.display =
+        btn.dataset.view === "admin-panel" ? "block" : "none";
     }
   });
 });
+
+// ----------------------------
+// staff Dashboard functionality
+// ----------------------------
+// Show staff dashboard
+function showStaffDashboard() {
+    document.querySelectorAll("main > section").forEach(sec => sec.style.display = "none");
+    document.getElementById("staffDashboard").style.display = "block";
+}
+
+// Sample data (replace with Firebase / backend)
+const staffProjects = [
+    { id: 1, title: "Project Alpha", submittedBy: "user123", status: "pending" },
+    { id: 2, title: "Project Beta", submittedBy: "user456", status: "pending" }
+];
+
+const usersList = [
+    { id: 1, username: "user123", email: "user123@email.com" },
+    { id: 2, username: "user456", email: "user456@email.com" }
+];
+
+const flaggedContent = [
+    { id: 1, title: "Offensive Post", reportedBy: "user789", type: "post" },
+    { id: 2, title: "Spam Comment", reportedBy: "user456", type: "comment" }
+];
+
+const supportTickets = [
+    { id: 1, title: "Cannot upload project", assignedTo: "staff1", status: "open" }
+];
+
+// Populate Staff Projects
+const staffProjectsList = document.getElementById("staffProjectsList");
+staffProjects.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "list item";
+    div.innerHTML = `
+        <span>${p.title} (submitted by ${p.submittedBy})</span>
+        <div>
+            <button class="btn small approveBtn">Approve</button>
+            <button class="btn small rejectBtn">Reject</button>
+        </div>
+    `;
+    staffProjectsList.appendChild(div);
+
+    div.querySelector(".approveBtn").addEventListener("click", () => {
+        alert(`Project "${p.title}" approved!`);
+        div.remove();
+    });
+    div.querySelector(".rejectBtn").addEventListener("click", () => {
+        alert(`Project "${p.title}" rejected!`);
+        div.remove();
+    });
+});
+
+// Populate User Oversight
+const staffUserOversight = document.getElementById("staffUserOversight");
+usersList.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "list item";
+    div.innerHTML = `
+        <span>${u.username} (${u.email})</span>
+        <div>
+            <button class="btn small warnBtn">Warn</button>
+            <button class="btn small suspendBtn">Suspend</button>
+        </div>
+    `;
+    staffUserOversight.appendChild(div);
+
+    div.querySelector(".warnBtn").addEventListener("click", () => alert(`Warned ${u.username}`));
+    div.querySelector(".suspendBtn").addEventListener("click", () => alert(`Suspended ${u.username}`));
+});
+
+// Populate Content Moderation
+const staffContentModeration = document.getElementById("staffContentModeration");
+flaggedContent.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "list item";
+    div.innerHTML = `
+        <span>${c.title} (reported by ${c.reportedBy})</span>
+        <div>
+            <button class="btn small removeBtn">Remove</button>
+            <button class="btn small ignoreBtn">Ignore</button>
+        </div>
+    `;
+    staffContentModeration.appendChild(div);
+
+    div.querySelector(".removeBtn").addEventListener("click", () => {
+        alert(`Removed ${c.title}`);
+        div.remove();
+    });
+    div.querySelector(".ignoreBtn").addEventListener("click", () => div.remove());
+});
+
+// Populate Support Tickets
+const staffSupport = document.getElementById("staffSupport");
+supportTickets.forEach(t => {
+    const div = document.createElement("div");
+    div.className = "list item";
+    div.innerHTML = `
+        <span>${t.title} (assigned)</span>
+        <div>
+            <button class="btn small resolveBtn">Resolve</button>
+        </div>
+    `;
+    staffSupport.appendChild(div);
+
+    div.querySelector(".resolveBtn").addEventListener("click", () => {
+        alert(`Ticket "${t.title}" resolved!`);
+        div.remove();
+    });
+});
+
+// Session Log Example
+const staffSessionLog = document.getElementById("staffSessionLog");
+["Login 16 Aug 2025 10:05", "Logout 16 Aug 2025 12:20"].forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = s;
+    staffSessionLog.appendChild(li);
+});
+
 
 // ----------------------------
 // Admin Dashboard functionality

@@ -5,38 +5,7 @@
      *   --uon-black: #000000;  greys: #323232, #7F7F7F, #BFBFBF, #E5E5E5; white #FFFFFF
      * Light/Dark via data-theme attribute on <html>.
      */
-:root {
-    --uon-blue: #35B0E6;
-    --uon-black: #000000;
-    --g-90: #1a1a1a;
-    /* custom surface for dark */
-    --g-80: #323232;
-    /* brand 80% */
-    --g-50: #7F7F7F;
-    /* brand 50% */
-    --g-20: #BFBFBF;
-    /* brand 20% */
-    --g-10: #E5E5E5;
-    /* brand 10% */
-    --white: #FFFFFF;
 
-    --bg: #f7f8f9;
-    --card: #ffffff;
-    --text: #222;
-    --muted: #555;
-    --border: #e6e6e6;
-    --shadow: 0 10px 30px rgba(0, 0, 0, .08);
-    --radius: 16px;
-}
-
-html[data-theme="dark"] {
-    --bg: #0d0f10;
-    --card: #15181a;
-    --text: #e6e6e6;
-    --muted: #a9b0b6;
-    --border: #23272a;
-    --shadow: 0 10px 30px rgba(0, 0, 0, .35);
-}
 
 * {
     box-sizing: border-box;
@@ -45,6 +14,11 @@ html[data-theme="dark"] {
 html,
 body {
     height: 100%;
+}
+
+a {
+    color: var(--uon-blue);
+    text-decoration: underline;
 }
 
 body {
@@ -225,6 +199,12 @@ header h1 {
     background: transparent;
     color: #cbd5dc;
     border: 1px solid #263039;
+}
+
+.btn.signIn {
+    color: var(--uon-black);
+    border: 1px solid var(--uon-black);
+    background-color: var(--uon-blue);
 }
 
 /* Main */

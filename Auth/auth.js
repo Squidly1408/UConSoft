@@ -40,5 +40,5 @@ form.addEventListener("submit", (e) => {
 function signOut() {
   localStorage.removeItem("loggedIn");
   localStorage.removeItem("userType");
-  window.location.href = "./login.html";
+  window.location.href = "./auth/login.html";
 }

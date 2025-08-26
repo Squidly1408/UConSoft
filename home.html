@@ -7,9 +7,11 @@
     <title>uConSoft — UON's Social Portfolio</title>
     <meta name="description"
         content="Demo social portfolio for UON students, staff and companies. Built for Firebase drop‑in.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="shortcut icon" href="./assets/images/logo.svg" type="image/x-icon">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./Colours.css">
     <link rel="stylesheet" href="./style.css">
 
 </head>
@@ -43,9 +45,9 @@
 
 
             <div class="footer">
+                <button class="btn signIn" id="signinBtn" onclick="signIn()">Sign In</button>
                 <button class="btn ghost" id="signinBtn" onclick="signOut()">Sign Out</button>
-                <div style="opacity:.7">Brand colours and typography follow UON guidelines. This demo does not use the
-                    official logo.</div>
+                <div style="opacity:.7">By using this Web Application you agree to the terms and conditions outlined here: <a href="./TandCs.html"><span>Term and Conditions</span></a></div>
             </div>
         </aside>
 
@@ -286,80 +288,156 @@
                     </div>
                 </div>
             </div>
-            <div id="adminScreen" class="admin">
-  <h2>Admin Dashboard</h2>
+            <div id="adminScreen" class="admin" style="display: none;">
+                <h2>Admin Dashboard</h2>
 
-  <!-- Stats -->
-  <div class="statbar">
-    <div class="stat">
-      <div class="num" id="totalUsers">0</div>
-      <div>Total Users</div>
+                <!-- Stats -->
+                <div class="statbar">
+                    <div class="stat">
+                        <div class="num" id="totalUsers">0</div>
+                        <div>Total Users</div>
+                    </div>
+                    <div class="stat">
+                        <div class="num" id="totalPosts">0</div>
+                        <div>Total Posts</div>
+                    </div>
+                    <div class="stat">
+                        <div class="num" id="flaggedPosts">0</div>
+                        <div>Flagged Posts</div>
+                    </div>
+                </div>
+
+                <!-- Two columns: Users | Posts -->
+                <div class="columns">
+                    <!-- User Management -->
+                    <section>
+                        <h3>User Management</h3>
+                        <div id="userList"></div>
+                        <button class="btn primary" id="addUserBtn">Add User</button>
+                    </section>
+
+                    <!-- Content Management -->
+                    <section>
+                        <h3>Content Management</h3>
+                        <div id="postList"></div>
+                    </section>
+                </div>
+            </div>
+            <!-- Staff Dashboard -->
+            <section id="staffDashboard" style="display: none;" class="staff">
+                <h2>Staff Dashboard</h2>
+
+                <!-- Projects to sign off -->
+                <div class="card">
+                    <div class="head">
+                        <h3>Projects Pending Staff Sign-Off</h3>
+                    </div>
+                    <div class="content" id="staffProjectsList">
+                        <!-- Project items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- User Oversight -->
+                <div class="card">
+                    <div class="head">
+                        <h3>User Oversight</h3>
+                    </div>
+                    <div class="content" id="staffUserOversight">
+                        <!-- Users list -->
+                    </div>
+                </div>
+
+                <!-- Content Moderation -->
+                <div class="card">
+                    <div class="head">
+                        <h3>Content Moderation</h3>
+                    </div>
+                    <div class="content" id="staffContentModeration">
+                        <!-- Flagged content list -->
+                    </div>
+                </div>
+
+                <!-- Community & Safety -->
+                <div class="card">
+                    <div class="head">
+                        <h3>Community & Safety</h3>
+                    </div>
+                    <div class="content" id="staffCommunitySafety">
+                        <!-- Reports / escalations -->
+                    </div>
+                </div>
+
+                <!-- Analytics & Insights (Limited) -->
+                <div class="card">
+                    <div class="head">
+                        <h3>Analytics & Insights</h3>
+                    </div>
+                    <div class="content" id="staffAnalytics">
+                        <p>Posts handled: <span id="postsHandled">0</span></p>
+                        <p>Comments handled: <span id="commentsHandled">0</span></p>
+                    </div>
+                </div>
+
+                <!-- System & Security (Restricted) -->
+                <div class="card">
+                    <div class="head">
+                        <h3>System & Security</h3>
+                    </div>
+                    <div class="content" id="staffSystemSecurity">
+                        <p>Session Log:</p>
+                        <ul id="staffSessionLog"></ul>
+                    </div>
+                </div>
+
+                <!-- Support & Communication -->
+                <div class="card">
+                    <div class="head">
+                        <h3>Support & Communication</h3>
+                    </div>
+                    <div class="content" id="staffSupport">
+                        <!-- Tickets assigned to staff -->
+                    </div>
+                </div>
+            </section>
+
     </div>
-    <div class="stat">
-      <div class="num" id="totalPosts">0</div>
-      <div>Total Posts</div>
-    </div>
-    <div class="stat">
-      <div class="num" id="flaggedPosts">0</div>
-      <div>Flagged Posts</div>
-    </div>
-  </div>
-
-  <!-- Two columns: Users | Posts -->
-  <div class="columns">
-    <!-- User Management -->
-    <section>
-      <h3>User Management</h3>
-      <div id="userList"></div>
-      <button class="btn primary" id="addUserBtn">Add User</button>
-    </section>
-
-    <!-- Content Management -->
-    <section>
-      <h3>Content Management</h3>
-      <div id="postList"></div>
-    </section>
-  </div>
-</div>
-
-  </div>
-</div>
-
-
-
-
-
-
-
-        </main>
     </div>
 
-<!-- Edit User Modal -->
-<dialog id="editUserModal">
-  <div class="modal-head">
-    <h4>Edit User</h4>
-    <button class="btn ghost" onclick="closeModal('editUserModal')">X</button>
-  </div>
-  <div class="modal-body">
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="editUsername">
+
+
+
+
+
+
+    </main>
     </div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="editEmail">
-    </div>
-    <div class="field">
-      <label>Role</label>
-      <select id="editRole">
-        <option value="admin">Admin</option>
-        <option value="staff">Staff</option>
-        <option value="user">User</option>
-      </select>
-    </div>
-    <button class="btn primary" id="saveUserBtn">Save Changes</button>
-  </div>
-</dialog>
+
+    <!-- Edit User Modal -->
+    <dialog id="editUserModal">
+        <div class="modal-head">
+            <h4>Edit User</h4>
+            <button class="btn ghost" onclick="closeModal('editUserModal')">X</button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                <label>Username</label>
+                <input type="text" id="editUsername">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="editEmail">
+            </div>
+            <div class="field">
+                <label>Role</label>
+                <select id="editRole">
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                    <option value="user">User</option>
+                </select>
+            </div>
+            <button class="btn primary" id="saveUserBtn">Save Changes</button>
+        </div>
+    </dialog>
     <!-- Project Modal -->
     <dialog id="projectModal">
         <div class="modal-head">
@@ -421,6 +499,8 @@
             </div>
         </form>
     </dialog>
+    <script src="./data/users.js"></script>
+    <script src="./data/projects.js"></script>
     <script src="./script.js"></script>
     <script src="./Auth/auth.js"></script>
 </body>
