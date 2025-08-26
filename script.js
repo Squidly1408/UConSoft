@@ -2,13 +2,37 @@
 // Demo user and session handling
 // ----------------------------
 const loggedIn = localStorage.getItem("loggedIn");
-const currentUser = localStorage.getItem("username") || "Lucas"; // default demo
-const userType = localStorage.getItem("userType") || "student";
+
+// Get username from URL hash (website.com/#username)
+const urlUser = window.location.hash.replace("#", "") || null;
+
+// Use localStorage username if logged in, otherwise fallback to URL username
+const currentUser = localStorage.getItem("username") || urlUser;
+
+// Default userType
+const userType = localStorage.getItem("userType") || "public";
+
+function updateUserFromHash() {
+  const urlUser = window.location.hash.replace("#", "") || null;
+  const currentUser = localStorage.getItem("username") || urlUser;
+  const userType = localStorage.getItem("userType") || "public";
+
+  // Example: update UI with the current user
+  document.getElementById("profileName").textContent = currentUser;
+  console.log("Now showing profile for:", currentUser, "Type:", userType);
+}
+
+
 
 if (!loggedIn || !userType) {
   notLoggedIn();
 } else {
   document.getElementsByClassName("btn signIn")[0].style.display = "none";
+  if (urlUser) {
+        renderProjects("", urlUser, true);
+    } else {
+        renderProjects("", "", false);
+    }
 }
 
 document.getElementById("userRole").textContent =
@@ -18,8 +42,14 @@ document.getElementById("userRole").textContent =
 // Non-logged in view
 // ----------------------------
 function notLoggedIn() {
+    
     document.getElementsByClassName("nav")[0].style.display = "none";
     document.getElementsByClassName("btn ghost")[0].style.display = "none";
+    if (urlUser) {
+        renderProjects("", urlUser, true);
+    } else {
+        renderProjects("", "", false);
+    }
 }
 
 
@@ -67,22 +97,35 @@ function fmt(n) {
   return new Intl.NumberFormat().format(n);
 }
 
+
+function viewProfile(user) {
+  window.location.hash = `#${user}`;
+  window.location.reload();
+}
+
 // ----------------------------
 // Render Projects
 // ----------------------------
-function renderProjects(filter = "") {
-  const wrap = document.getElementById("projects");
+function renderProjects(filter = "", username = "", Render = true) {
+  if (Render){
+    const wrap = document.getElementById("projects");
   wrap.innerHTML = "";
 
+  // filter projects
   projects
-    .filter(
-      (p) =>
+    .filter((p) => {
+      // if username given, only show that user's projects
+      if (username && p.owner !== username) return false;
+
+      // otherwise check search filter
+      return (
         !filter ||
-        [p.title, p.type, p.desc, ...p.tags]
+        [p.title, p.type, p.desc, p.owner, ...p.tags]
           .join(" ")
           .toLowerCase()
           .includes(filter.toLowerCase())
-    )
+      );
+    })
     .forEach((p) => {
       const el = document.createElement("div");
       el.className = "project";
@@ -106,7 +149,7 @@ function renderProjects(filter = "") {
         <div class="meta">${fmt(p.views)} views · <span class="likes">${fmt(
         p.likes.length
       )}</span> likes</div>
-      <div class="pill username" onclick="viewProfile('john')">${p.owner}</div>
+      <div class="pill username" onclick="viewProfile('${p.owner}')">${p.owner}</div>
         <div style="margin-top:6px;">
           ${canEdit ? '<button class="btn editBtn">Edit</button>' : ""}
           <button class="btn likeBtn">${liked ? "Unlike" : "Like"}</button>
@@ -140,7 +183,7 @@ function renderProjects(filter = "") {
             p.title
           }"`
         );
-        renderProjects(filter);
+        renderProjects(filter, username, true); // keep username filter
       });
 
       // Sign-off button
@@ -153,21 +196,26 @@ function renderProjects(filter = "") {
             timestamp: new Date(),
           });
           logActivity(`${currentUser} signed off project "${p.title}"`);
-          renderProjects(filter);
+          renderProjects(filter, username, true); // keep username filter
         });
       }
     });
 
-  // Update stats
-  document.getElementById("statViews").textContent = projects.reduce(
+  // Update stats (respecting username filter)
+  const visibleProjects = projects.filter(
+    (p) => !username || p.owner === username
+  );
+
+  document.getElementById("statViews").textContent = visibleProjects.reduce(
     (a, b) => a + b.views,
     0
   );
-  document.getElementById("statSignoffs").textContent = projects.reduce(
+  document.getElementById("statSignoffs").textContent = visibleProjects.reduce(
     (a, b) => a + b.signedOffBy.length,
     0
   );
-  document.getElementById("statProjects").textContent = projects.length;
+  document.getElementById("statProjects").textContent = visibleProjects.length;
+}
 }
 
 // ----------------------------
@@ -666,6 +714,8 @@ projectForm.addEventListener("submit", (e) => {
 // Initial render
 // ----------------------------
 renderProfile();
-renderProjects();
 renderActivity();
 renderPeople();
+updateUserFromHash();
+window.addEventListener("load", updateUserFromHash);
+window.addEventListener("hashchange", updateUserFromHash);
