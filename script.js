@@ -4,35 +4,58 @@
 const loggedIn = localStorage.getItem("loggedIn");
 
 // Get username from URL hash (website.com/#username)
-const urlUser = window.location.hash.replace("#", "") || null;
+let urlUser = window.location.hash.replace("#", "") || null;
 
 // Use localStorage username if logged in, otherwise fallback to URL username
-const currentUser = localStorage.getItem("username") || urlUser;
+let currentUser = localStorage.getItem("username") || urlUser;
 
-// Default userType
-const userType = localStorage.getItem("userType") || "public";
-
-function updateUserFromHash() {
-  const urlUser = window.location.hash.replace("#", "") || null;
-  const currentUser = localStorage.getItem("username") || urlUser;
-  const userType = localStorage.getItem("userType") || "public";
-
-  // Example: update UI with the current user
-  document.getElementById("profileName").textContent = currentUser;
-  console.log("Now showing profile for:", currentUser, "Type:", userType);
+// Function to get user info from username
+function getUserInfo(username) {
+  return (
+    users.find((u) => u.username === username) || {
+      username: "Guest",
+      name: "Guest",
+      type: "public",
+      title: "",
+    }
+  );
 }
 
+// Set initial user info
+let userInfo = getUserInfo(currentUser);
+let userType = userInfo.type;
 
+function updateUserFromHash() {
+  urlUser = window.location.hash.replace("#", "") || null;
+  currentUser = localStorage.getItem("username") || urlUser;
+
+  userInfo = getUserInfo(currentUser);
+  userType = userInfo.type;
+
+  // Example: update UI with the current user info
+  document.getElementById("profileName").textContent = userInfo.name;
+  document.getElementById("profileType").textContent = userInfo.type;
+  document.getElementById("profileTitle").textContent = userInfo.title;
+
+  console.log(
+    "Now showing profile for:",
+    userInfo.name,
+    "Type:",
+    userInfo.type,
+    "Title:",
+    userInfo.title
+  );
+}
 
 if (!loggedIn || !userType) {
   notLoggedIn();
 } else {
   document.getElementsByClassName("btn signIn")[0].style.display = "none";
   if (urlUser) {
-        renderProjects("", urlUser, true);
-    } else {
-        renderProjects("", "", false);
-    }
+    renderProjects("", urlUser, true);
+  } else {
+    renderProjects("", "", true);
+  }
 }
 
 document.getElementById("userRole").textContent =
@@ -42,17 +65,14 @@ document.getElementById("userRole").textContent =
 // Non-logged in view
 // ----------------------------
 function notLoggedIn() {
-    
-    document.getElementsByClassName("nav")[0].style.display = "none";
-    document.getElementsByClassName("btn ghost")[0].style.display = "none";
-    if (urlUser) {
-        renderProjects("", urlUser, true);
-    } else {
-        renderProjects("", "", false);
-    }
+  document.getElementsByClassName("nav")[0].style.display = "none";
+  document.getElementsByClassName("btn ghost")[0].style.display = "none";
+  if (urlUser) {
+    renderProjects("", urlUser, true);
+  } else {
+    renderProjects("", "", false);
+  }
 }
-
-
 
 // ----------------------------
 // Theme toggle
@@ -77,9 +97,6 @@ themeToggle.addEventListener("click", () => {
 // Demo database (ready for real DB later)
 // ----------------------------
 
-
-
-
 let activityFeed = []; // global activity array
 
 let peopleYouMayKnow = ["Alice", "Bob"]; // demo data
@@ -97,6 +114,9 @@ function fmt(n) {
   return new Intl.NumberFormat().format(n);
 }
 
+function windowReload() {
+  window.location.reload();
+}
 
 function viewProfile(user) {
   window.location.hash = `#${user}`;
@@ -107,38 +127,38 @@ function viewProfile(user) {
 // Render Projects
 // ----------------------------
 function renderProjects(filter = "", username = "", Render = true) {
-  if (Render){
+  if (Render) {
     const wrap = document.getElementById("projects");
-  wrap.innerHTML = "";
+    wrap.innerHTML = "";
 
-  // filter projects
-  projects
-    .filter((p) => {
-      // if username given, only show that user's projects
-      if (username && p.owner !== username) return false;
+    // filter projects
+    projects
+      .filter((p) => {
+        // if username given, only show that user's projects
+        if (username && p.owner !== username) return false;
 
-      // otherwise check search filter
-      return (
-        !filter ||
-        [p.title, p.type, p.desc, p.owner, ...p.tags]
-          .join(" ")
-          .toLowerCase()
-          .includes(filter.toLowerCase())
-      );
-    })
-    .forEach((p) => {
-      const el = document.createElement("div");
-      el.className = "project";
-      el.dataset.id = p.id;
+        // otherwise check search filter
+        return (
+          !filter ||
+          [p.title, p.type, p.desc, p.owner, ...p.tags]
+            .join(" ")
+            .toLowerCase()
+            .includes(filter.toLowerCase())
+        );
+      })
+      .forEach((p) => {
+        const el = document.createElement("div");
+        el.className = "project";
+        el.dataset.id = p.id;
 
-      const liked = p.likes.includes(currentUser);
-      const canEdit = p.owner === currentUser;
-      const canSignOff =
-        p.signOffRequested &&
-        !p.signedOffBy.includes(currentUser) &&
-        ["Staff", "Company", "Admin"].includes(userType);
+        const liked = p.likes.includes(currentUser);
+        const canEdit = p.owner === currentUser;
+        const canSignOff =
+          p.signOffRequested &&
+          !p.signedOffBy.includes(currentUser) &&
+          ["Staff", "Company", "Admin"].includes(userType);
 
-      el.innerHTML = `
+        el.innerHTML = `
       <div class="cover"><span>${escapeHtml(p.title)}</span></div>
       <div class="body">
         <div class="pill">${p.type}</div>
@@ -147,9 +167,11 @@ function renderProjects(filter = "", username = "", Render = true) {
           .map((t) => `<span class="pill">#${escapeHtml(t)}</span>`)
           .join("")}</div>
         <div class="meta">${fmt(p.views)} views · <span class="likes">${fmt(
-        p.likes.length
-      )}</span> likes</div>
-      <div class="pill username" onclick="viewProfile('${p.owner}')">${p.owner}</div>
+          p.likes.length
+        )}</span> likes</div>
+      <div class="pill username" onclick="viewProfile('${p.owner}')">${
+          p.owner
+        }</div>
         <div style="margin-top:6px;">
           ${canEdit ? '<button class="btn editBtn">Edit</button>' : ""}
           <button class="btn likeBtn">${liked ? "Unlike" : "Like"}</button>
@@ -159,63 +181,62 @@ function renderProjects(filter = "", username = "", Render = true) {
         </div>
       </div>
     `;
-      wrap.appendChild(el);
+        wrap.appendChild(el);
 
-      // Edit button
-      if (canEdit) {
-        el.querySelector(".editBtn").addEventListener("click", () =>
-          openProjectModal(p.id)
-        );
-      }
+        // Edit button
+        if (canEdit) {
+          el.querySelector(".editBtn").addEventListener("click", () =>
+            openProjectModal(p.id)
+          );
+        }
 
-      // Like button
-      el.querySelector(".likeBtn").addEventListener("click", () => {
-        const idx = p.likes.indexOf(currentUser);
-        if (idx === -1) p.likes.push(currentUser);
-        else p.likes.splice(idx, 1);
-        p.activity.push({
-          type: "like",
-          user: currentUser,
-          timestamp: new Date(),
-        });
-        logActivity(
-          `${currentUser} ${idx === -1 ? "liked" : "unliked"} project "${
-            p.title
-          }"`
-        );
-        renderProjects(filter, username, true); // keep username filter
-      });
-
-      // Sign-off button
-      if (canSignOff) {
-        el.querySelector(".signOffBtn").addEventListener("click", () => {
-          p.signedOffBy.push(currentUser);
+        // Like button
+        el.querySelector(".likeBtn").addEventListener("click", () => {
+          const idx = p.likes.indexOf(currentUser);
+          if (idx === -1) p.likes.push(currentUser);
+          else p.likes.splice(idx, 1);
           p.activity.push({
-            type: "signoff",
+            type: "like",
             user: currentUser,
             timestamp: new Date(),
           });
-          logActivity(`${currentUser} signed off project "${p.title}"`);
+          logActivity(
+            `${currentUser} ${idx === -1 ? "liked" : "unliked"} project "${
+              p.title
+            }"`
+          );
           renderProjects(filter, username, true); // keep username filter
         });
-      }
-    });
 
-  // Update stats (respecting username filter)
-  const visibleProjects = projects.filter(
-    (p) => !username || p.owner === username
-  );
+        // Sign-off button
+        if (canSignOff) {
+          el.querySelector(".signOffBtn").addEventListener("click", () => {
+            p.signedOffBy.push(currentUser);
+            p.activity.push({
+              type: "signoff",
+              user: currentUser,
+              timestamp: new Date(),
+            });
+            logActivity(`${currentUser} signed off project "${p.title}"`);
+            renderProjects(filter, username, true); // keep username filter
+          });
+        }
+      });
 
-  document.getElementById("statViews").textContent = visibleProjects.reduce(
-    (a, b) => a + b.views,
-    0
-  );
-  document.getElementById("statSignoffs").textContent = visibleProjects.reduce(
-    (a, b) => a + b.signedOffBy.length,
-    0
-  );
-  document.getElementById("statProjects").textContent = visibleProjects.length;
-}
+    // Update stats (respecting username filter)
+    const visibleProjects = projects.filter(
+      (p) => !username || p.owner === username
+    );
+
+    document.getElementById("statViews").textContent = visibleProjects.reduce(
+      (a, b) => a + b.views,
+      0
+    );
+    document.getElementById("statSignoffs").textContent =
+      visibleProjects.reduce((a, b) => a + b.signedOffBy.length, 0);
+    document.getElementById("statProjects").textContent =
+      visibleProjects.length;
+  }
 }
 
 // ----------------------------
@@ -256,11 +277,34 @@ function renderPeople() {
 // ----------------------------
 // Profile details live
 // ----------------------------
-function renderProfile() {
-  const profileUser = users.find((u) => u.username === currentUser);
+function renderProfile(Home, fromNavButton = false, resetHash = false) {
+  let profileUsername;
+
+  if (fromNavButton && loggedIn) {
+    profileUsername = localStorage.getItem("username");
+
+    if (resetHash) {
+      history.pushState(
+        "",
+        document.title,
+        window.location.pathname + window.location.search
+      );
+    }
+  } else {
+    const urlUser = window.location.hash.replace("#", "") || null;
+    profileUsername = urlUser || currentUser;
+  }
+
+  const profileUser = users.find((u) => u.username === profileUsername) || {
+    name: "Guest",
+    title: "",
+    type: "public",
+  };
+
   document.querySelector(".profile .row div:nth-child(2) div").textContent =
     profileUser.name;
   document.getElementById("profileTitle").textContent = profileUser.title;
+  document.getElementById("profileType").textContent = profileUser.type;
 }
 
 // ----------------------------
@@ -309,6 +353,7 @@ tabs.forEach((btn) => {
         btn.dataset.view === "feed" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "feed" ? "none" : "block";
+      windowReload();
     }
     // profile section
     if (btn.dataset.view === "my-profile") {
@@ -322,6 +367,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "my-profile" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "my-profile" ? "none" : "block";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
     // discover section
     if (btn.dataset.view === "discover") {
@@ -335,6 +383,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "discover" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "discover" ? "none" : "block";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
     // settings section
     if (btn.dataset.view === "settings") {
@@ -348,6 +399,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "settings" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "settings" ? "none" : "block";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
     // staff panel section
     if (btn.dataset.view === "staff-panel") {
@@ -361,6 +415,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "staff-panel" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "staff-panel" ? "block" : "none";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
     // company panel section
     if (btn.dataset.view === "company-panel") {
@@ -374,6 +431,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "company-panel" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "company-panel" ? "none" : "block";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
     // admin panel
     if (btn.dataset.view === "admin-Panel") {
@@ -387,6 +447,9 @@ tabs.forEach((btn) => {
         btn.dataset.view === "admin-panel" ? "none" : "block";
       staffSection.style.display =
         btn.dataset.view === "admin-panel" ? "block" : "none";
+      window.location.hash = ``;
+      renderProfile(false, true);
+      windowReload();
     }
   });
 });
@@ -396,120 +459,132 @@ tabs.forEach((btn) => {
 // ----------------------------
 // Show staff dashboard
 function showStaffDashboard() {
-    document.querySelectorAll("main > section").forEach(sec => sec.style.display = "none");
-    document.getElementById("staffDashboard").style.display = "block";
+  document
+    .querySelectorAll("main > section")
+    .forEach((sec) => (sec.style.display = "none"));
+  document.getElementById("staffDashboard").style.display = "block";
 }
 
 // Sample data (replace with Firebase / backend)
 const staffProjects = [
-    { id: 1, title: "Project Alpha", submittedBy: "user123", status: "pending" },
-    { id: 2, title: "Project Beta", submittedBy: "user456", status: "pending" }
+  { id: 1, title: "Project Alpha", submittedBy: "user123", status: "pending" },
+  { id: 2, title: "Project Beta", submittedBy: "user456", status: "pending" },
 ];
 
 const usersList = [
-    { id: 1, username: "user123", email: "user123@email.com" },
-    { id: 2, username: "user456", email: "user456@email.com" }
+  { id: 1, username: "user123", email: "user123@email.com" },
+  { id: 2, username: "user456", email: "user456@email.com" },
 ];
 
 const flaggedContent = [
-    { id: 1, title: "Offensive Post", reportedBy: "user789", type: "post" },
-    { id: 2, title: "Spam Comment", reportedBy: "user456", type: "comment" }
+  { id: 1, title: "Offensive Post", reportedBy: "user789", type: "post" },
+  { id: 2, title: "Spam Comment", reportedBy: "user456", type: "comment" },
 ];
 
 const supportTickets = [
-    { id: 1, title: "Cannot upload project", assignedTo: "staff1", status: "open" }
+  {
+    id: 1,
+    title: "Cannot upload project",
+    assignedTo: "staff1",
+    status: "open",
+  },
 ];
 
 // Populate Staff Projects
 const staffProjectsList = document.getElementById("staffProjectsList");
-staffProjects.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "list item";
-    div.innerHTML = `
+staffProjects.forEach((p) => {
+  const div = document.createElement("div");
+  div.className = "list item";
+  div.innerHTML = `
         <span>${p.title} (submitted by ${p.submittedBy})</span>
         <div>
             <button class="btn small approveBtn">Approve</button>
             <button class="btn small rejectBtn">Reject</button>
         </div>
     `;
-    staffProjectsList.appendChild(div);
+  staffProjectsList.appendChild(div);
 
-    div.querySelector(".approveBtn").addEventListener("click", () => {
-        alert(`Project "${p.title}" approved!`);
-        div.remove();
-    });
-    div.querySelector(".rejectBtn").addEventListener("click", () => {
-        alert(`Project "${p.title}" rejected!`);
-        div.remove();
-    });
+  div.querySelector(".approveBtn").addEventListener("click", () => {
+    alert(`Project "${p.title}" approved!`);
+    div.remove();
+  });
+  div.querySelector(".rejectBtn").addEventListener("click", () => {
+    alert(`Project "${p.title}" rejected!`);
+    div.remove();
+  });
 });
 
 // Populate User Oversight
 const staffUserOversight = document.getElementById("staffUserOversight");
-usersList.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "list item";
-    div.innerHTML = `
+usersList.forEach((u) => {
+  const div = document.createElement("div");
+  div.className = "list item";
+  div.innerHTML = `
         <span>${u.username} (${u.email})</span>
         <div>
             <button class="btn small warnBtn">Warn</button>
             <button class="btn small suspendBtn">Suspend</button>
         </div>
     `;
-    staffUserOversight.appendChild(div);
+  staffUserOversight.appendChild(div);
 
-    div.querySelector(".warnBtn").addEventListener("click", () => alert(`Warned ${u.username}`));
-    div.querySelector(".suspendBtn").addEventListener("click", () => alert(`Suspended ${u.username}`));
+  div
+    .querySelector(".warnBtn")
+    .addEventListener("click", () => alert(`Warned ${u.username}`));
+  div
+    .querySelector(".suspendBtn")
+    .addEventListener("click", () => alert(`Suspended ${u.username}`));
 });
 
 // Populate Content Moderation
-const staffContentModeration = document.getElementById("staffContentModeration");
-flaggedContent.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "list item";
-    div.innerHTML = `
+const staffContentModeration = document.getElementById(
+  "staffContentModeration"
+);
+flaggedContent.forEach((c) => {
+  const div = document.createElement("div");
+  div.className = "list item";
+  div.innerHTML = `
         <span>${c.title} (reported by ${c.reportedBy})</span>
         <div>
             <button class="btn small removeBtn">Remove</button>
             <button class="btn small ignoreBtn">Ignore</button>
         </div>
     `;
-    staffContentModeration.appendChild(div);
+  staffContentModeration.appendChild(div);
 
-    div.querySelector(".removeBtn").addEventListener("click", () => {
-        alert(`Removed ${c.title}`);
-        div.remove();
-    });
-    div.querySelector(".ignoreBtn").addEventListener("click", () => div.remove());
+  div.querySelector(".removeBtn").addEventListener("click", () => {
+    alert(`Removed ${c.title}`);
+    div.remove();
+  });
+  div.querySelector(".ignoreBtn").addEventListener("click", () => div.remove());
 });
 
 // Populate Support Tickets
 const staffSupport = document.getElementById("staffSupport");
-supportTickets.forEach(t => {
-    const div = document.createElement("div");
-    div.className = "list item";
-    div.innerHTML = `
+supportTickets.forEach((t) => {
+  const div = document.createElement("div");
+  div.className = "list item";
+  div.innerHTML = `
         <span>${t.title} (assigned)</span>
         <div>
             <button class="btn small resolveBtn">Resolve</button>
         </div>
     `;
-    staffSupport.appendChild(div);
+  staffSupport.appendChild(div);
 
-    div.querySelector(".resolveBtn").addEventListener("click", () => {
-        alert(`Ticket "${t.title}" resolved!`);
-        div.remove();
-    });
+  div.querySelector(".resolveBtn").addEventListener("click", () => {
+    alert(`Ticket "${t.title}" resolved!`);
+    div.remove();
+  });
 });
 
 // Session Log Example
 const staffSessionLog = document.getElementById("staffSessionLog");
-["Login 16 Aug 2025 10:05", "Logout 16 Aug 2025 12:20"].forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = s;
-    staffSessionLog.appendChild(li);
+["Login 16 Aug 2025 10:05", "Logout 16 Aug 2025 12:20"].forEach((s) => {
+  const li = document.createElement("li");
+  li.textContent = s;
+  staffSessionLog.appendChild(li);
 });
-
 
 // ----------------------------
 // Admin Dashboard functionality
@@ -643,7 +718,9 @@ document.getElementById("profileForm").addEventListener("submit", (e) => {
   const profileUser = users.find((u) => u.username === currentUser);
   profileUser.name = form.name.value;
   profileUser.title = form.title.value;
-  renderProfile();
+  if (btn.dataset.view === "my-profile") {
+  }
+  renderProfile(localStorage.getItem("currentUser"), true);
   logActivity(`${currentUser} updated profile`);
   profileModal.close();
 });
@@ -707,13 +784,12 @@ projectForm.addEventListener("submit", (e) => {
   }
 
   projectModal.close();
-  renderProjects(document.getElementById("search").value);
 });
 
 // ----------------------------
 // Initial render
 // ----------------------------
-renderProfile();
+renderProfile(currentUser);
 renderActivity();
 renderPeople();
 updateUserFromHash();

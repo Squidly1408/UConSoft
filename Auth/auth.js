@@ -14,6 +14,13 @@ document.querySelector(".theme-toggle").addEventListener("click", () => {
   localStorage.setItem("theme", newTheme);
 });
 
+function SignIn(username, userType) {
+  localStorage.setItem("loggedIn", "true");
+  localStorage.setItem("username", username);
+  localStorage.setItem("userType", userType);
+  window.location.href = "../home.html";
+}
+
 // Login form handling
 const form = document.getElementById("loginForm");
 form.addEventListener("submit", (e) => {
@@ -22,16 +29,12 @@ form.addEventListener("submit", (e) => {
   const password = document.getElementById("password").value;
 
   let userType = null;
-  if (email === "1@uon.edu.au" && password) userType = "admin";
-  else if (["2@uon.edu.au"].includes(email) && password) userType = "staff";
-  else if (email === "3@uon.edu.au" && password) userType = "company";
-  else if (email === "4@uon.edu.au" && password) userType = "student";
-
-  if (userType) {
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("userType", userType);
-    window.location.href = "../home.html";
-  } else {
+  if (email === "1@uon.edu.au" && password) SignIn("Lucas", "admin");
+  else if (["2@uon.edu.au"].includes(email) && password)
+    SignIn("WillB", "staff");
+  else if (email === "3@uon.edu.au" && password) SignIn("EmmaR", "company");
+  else if (email === "4@uon.edu.au" && password) SignIn("SophieL", "student");
+  else {
     alert("Invalid email or password");
   }
 });
