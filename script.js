@@ -305,6 +305,10 @@ function renderProfile(Home, fromNavButton = false, resetHash = false) {
     profileUser.name;
   document.getElementById("profileTitle").textContent = profileUser.title;
   document.getElementById("profileType").textContent = profileUser.type;
+  document.getElementById("profileProjects").textContent = profileUser.projects;
+document.getElementById("profileSignOffs").textContent = profileUser.signOffs;
+document.getElementById("profileViews").textContent = profileUser.views;
+
 }
 
 // ----------------------------
@@ -726,6 +730,24 @@ document.getElementById("profileForm").addEventListener("submit", (e) => {
 });
 
 // ----------------------------
+// Enrich user data
+// ----------------------------
+function enrichUsers() {
+  users.forEach(u => {
+    // Projects owned
+    const owned = projects.filter(p => p.owner === u.username);
+
+    // Projects signed off by user
+    const signed = projects.filter(p => p.signedOffBy.includes(u.username));
+
+    u.projects = owned.length;
+    u.signOffs = signed.length;
+    u.views = owned.reduce((sum, p) => sum + p.views, 0);
+  });
+}
+
+
+// ----------------------------
 // Project modal (Create / Edit)
 // ----------------------------
 const projectModal = document.getElementById("projectModal");
@@ -789,6 +811,7 @@ projectForm.addEventListener("submit", (e) => {
 // ----------------------------
 // Initial render
 // ----------------------------
+enrichUsers();
 renderProfile(currentUser);
 renderActivity();
 renderPeople();
